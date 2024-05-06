@@ -132,4 +132,25 @@ public class WarehouseRepository : IWarehouseRepository
             connection.OpenAsync();
         }
     }
+
+    public async Task<int> AddProductStoredProcedure(int IdProduct, int IdWarehouse, int Amount, DateTime CreatedAt)
+    {
+        await using var connection = new SqlConnection(_configuration.GetConnectionString("Default"));
+        await using var command = new SqlCommand();
+
+        command.Connection = connection;
+        command.CommandText = "AddProductToWarehouse";
+        command.CommandType = CommandType.StoredProcedure;
+
+        command.Parameters.AddWithValue("@IdProduct", IdProduct);
+        command.Parameters.AddWithValue("@IdWarehouse", IdWarehouse);
+        command.Parameters.AddWithValue("@Amount", Amount);
+        command.Parameters.AddWithValue("@CreatedAt", CreatedAt);
+
+        await connection.OpenAsync();
+
+        var id = await command.ExecuteScalarAsync();
+
+        return Convert.ToInt32(id);
+    }
 }

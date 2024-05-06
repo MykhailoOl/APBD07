@@ -32,4 +32,10 @@ public class WarehouseController : ControllerBase
         _warehouseRepository.AddProduct(IdProduct, IdWarehouse, Amount, CreatedAt, IdOrder);
         return Created();
     }
+
+    [HttpPost]
+    public async Task<IActionResult> AddProductStoredProcedure(int IdProduct, int IdWarehouse, int Amount, DateTime CreatedAt)
+    {
+        return Created("", _warehouseRepository.AddProductStoredProcedure(IdProduct, IdWarehouse, Amount, CreatedAt));
+    }
 }

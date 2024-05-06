@@ -8,4 +8,5 @@ public interface IWarehouseRepository
     Task<bool> DoesOrderCompleted(int? IdOrder);
     public void UpdateFullfilledAt(int? IdOrder, DateTime CreatedAt);
     public void AddProduct(int IdProduct, int IdWarehouse, int Amount, DateTime CreatedAt,int? IdOrder);
+    public Task<int> AddProductStoredProcedure(int IdProduct, int IdWarehouse, int Amount, DateTime CreatedAt);
 }
