@@ -19,11 +19,17 @@ public class WarehouseController : ControllerBase
     {
         if (!await _warehouseRepository.DoesProductExist(IdProduct))
             return NotFound();
-        if (!await _warehouseRepository.DoesWarehouseExist(IdWarehouse))
+        if (await _warehouseRepository.DoesWarehouseExist(IdWarehouse))
             return NotFound();
         if (Amount < 0)
             return BadRequest("Amount cannot be negative");
-        if (!await _warehouseRepository.DoesOrderExist(IdWarehouse,Amount,CreatedAt))
+        var IdOrder = await _warehouseRepository.DoesOrderExist(IdWarehouse, Amount, CreatedAt);
+        if (IdOrder == null)
             return NotFound();
+        if (!await _warehouseRepository.DoesOrderCompleted(IdOrder))
+                return NotFound();
+        _warehouseRepository.UpdateFullfilledAt(IdOrder,CreatedAt);
+        _warehouseRepository.AddProduct(IdProduct, IdWarehouse, Amount, CreatedAt, IdOrder);
+        return Created();
     }
 }
