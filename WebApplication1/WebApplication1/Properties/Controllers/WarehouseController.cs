@@ -13,45 +13,17 @@ public class WarehouseController : ControllerBase
     {
         _warehouseRepository = warehouseRepository;
     }
+
     [HttpPost]
-    public async Task<IActionResult> AddProduct(Product product)
+    public async Task<IActionResult> AddProduct(int IdProduct,int IdWarehouse,int Amount,DateTime CreatedAt)
     {
-        bool productExist = await _warehouseService.ProductExist(product.IdProduct);
-        if (!productExist)
-        {
-            return NotFound($"Nie mozna znalezc produktu o id: {product.IdProduct} ");
-        }
-
-        bool warehouseExist = await _warehouseService.WarehouseExist(product.IdWarehouse);
-        if (!warehouseExist)
-        {
-            return NotFound($"Nie mozna znalezc magazynu o id: {product.IdWarehouse}");
-        }
-
-        int orderId = await _warehouseService.ProductWithDateAndAmount(product.IdProduct, product.Amount, product.CreatedAt);
-
-        if (orderId == Int32.MaxValue)
-        {
-            return NotFound("Nie mozna znalezc zamówienia");
-        }
-
-        bool notInCompleted = await _warehouseService.NotCompleted(orderId);
-
-        if (!notInCompleted)
-        {
-            return NotFound($"Zamowienie id: {orderId} jest skompletowane");
-        }
-
-        await _warehouseService.UpdateFulfilledAt(orderId);
-
-        await _warehouseService.InsertToPW(product, orderId);
-
-        int pk = await _warehouseService.GetPrimaryKey(product, orderId);
-        if (pk == 0)
-        {
-            return NotFound("Nie mozna znalezc danego zamowienia");
-        }
-        return Ok($"Klucz glowny do tego zamowienia to: {pk}");
-
+        if (!await _warehouseRepository.DoesProductExist(IdProduct))
+            return NotFound();
+        if (!await _warehouseRepository.DoesWarehouseExist(IdWarehouse))
+            return NotFound();
+        if (Amount < 0)
+            return BadRequest("Amount cannot be negative");
+        if (!await _warehouseRepository.DoesOrderExist(IdWarehouse,Amount,CreatedAt))
+            return NotFound();
     }
 }
